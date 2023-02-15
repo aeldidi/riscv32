@@ -1,5 +1,5 @@
 project(
-    'encoding',
+    'riscv32',
     'c',
     license: '0BSD',
     version: '1.0.0',
@@ -9,28 +9,7 @@ project(
     ],
 )
 
-srcs = files(
+emu_exe = executable(
+    'riscv32',
+    files('src/main.c')
 )
-
-# Generate the amalgamations
-
-amalgamate_exe = executable(
-    'amalgamate_exe',
-    files('tools/amalgamate.c'),
-)
-amalgamate_srcs = []
-
-foreach file : ['base32', 'base64', 'hex', 'utf8', 'utf16']
-    amalgamate_srcs += custom_target(
-        file + '.c',
-        input: srcs,
-        output: file + '.c',
-        command: [
-            amalgamate_exe,
-            meson.source_root() / 'src',
-            file,
-        ],
-    )
-endforeach
-
-subdir('tests')
