@@ -11,5 +11,8 @@ project(
 
 emu_exe = executable(
     'riscv32',
-    files('src/main.c')
+    files(
+        'src/main.c',
+        'src/riscv32.c',
+    )
 )
