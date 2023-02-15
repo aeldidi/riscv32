@@ -111,5 +111,5 @@ riscv32_dumpcpu(const struct riscv32_Cpu* cpu)
 	printf("t4:  %" PRId32 "\n", cpu->registers[RISCV32_T4]);
 	printf("t5:  %" PRId32 "\n", cpu->registers[RISCV32_T5]);
 	printf("t6:  %" PRId32 "\n", cpu->registers[RISCV32_T6]);
-	printf("pc:  %" PRId32 "\n", cpu->pc);
+	printf("pc:  %" PRId32 "\n", cpu->pc * 4);
 }
