@@ -9,7 +9,15 @@
 
 #include "panic.c"
 
+#define RD(instruction)                                                       \
+	((instruction & 0b00000000000000000000111110000000) >> 7)
+#define RS1(instruction)                                                      \
+	((instruction & 0b00000000000011111000000000000000) >> 15)
+#define RS2(instruction) ((instruction >> 20) & 0b11111)
+
 enum riscv32_instructions {
+	SUB,
+	ADD,
 	ADDI,
 	LUI,
 	ECALL,
@@ -19,17 +27,23 @@ enum riscv32_instructions {
 enum riscv32_instructions
 decode(const uint32_t instruction)
 {
-	uint32_t mask = 0b00000000000000000000000001111111;
-	if ((instruction & mask) == 0b00000000000000000000000000110111) {
+	if ((instruction & 0b00000000000000000000000001111111) == 0x37) {
 		return LUI;
 	}
 
-	if ((instruction & mask) == 0x73) {
+	if ((instruction & 0b00000000000000000000000001111111) == 0x73) {
 		return ECALL;
 	}
 
-	if ((instruction & 0b00000000000000000111000001111111) ==
-			0b00000000000000000000000000010011) {
+	if ((instruction & 0b11111110000000000011100000111111) == 0x33) {
+		return ADD;
+	}
+
+	if ((instruction & 0b11111110000000000011100000111111) == 0x40000033) {
+		return SUB;
+	}
+
+	if ((instruction & 0b00000000000000000111000001111111) == 0x13) {
 		return ADDI;
 	}
 
@@ -41,6 +55,9 @@ riscv32_execute(struct riscv32_Cpu* cpu, const size_t instructions_len,
 		const uint32_t* instructions)
 {
 	while (true) {
+		// The zero register should always be zero.
+		cpu->registers[0] = 0;
+
 		if (cpu->pc >= instructions_len) {
 			panic("out of bounds pc: %zu", cpu->pc);
 		}
@@ -60,17 +77,33 @@ riscv32_execute(struct riscv32_Cpu* cpu, const size_t instructions_len,
 			break;
 		}
 		case ADDI: {
-			uint32_t dest = (instruction & 0b00000000000000000000111110000000) >>
-					7;
-			uint32_t src = (instruction & 0b00000000000011111000000000000000) >>
-				       15;
+			uint32_t dest        = RD(instruction);
+			uint32_t src         = RS1(instruction);
 			uint32_t imm         = instruction >> 20;
 			cpu->registers[dest] = cpu->registers[src] + imm;
 			cpu->pc += 1;
 			break;
 		}
+		case ADD: {
+			uint32_t dest        = RD(instruction);
+			uint32_t src1        = RS1(instruction);
+			uint32_t src2        = RS2(instruction);
+			cpu->registers[dest] = cpu->registers[src1] +
+					       cpu->registers[src2];
+			cpu->pc += 1;
+			break;
+		}
+		case SUB: {
+			uint32_t dest        = RD(instruction);
+			uint32_t src1        = RS1(instruction);
+			uint32_t src2        = RS2(instruction);
+			cpu->registers[dest] = cpu->registers[src1] -
+					       cpu->registers[src2];
+			cpu->pc += 1;
+			break;
+		}
 		default:
-			panic("unimplemented opcode: %" PRIu32 "", opcode);
+			panic("unimplemented instruction: %X", instruction);
 		}
 	}
 }
