@@ -43,7 +43,7 @@ struct riscv32_Cpu {
 #define RISCV32_T6   (31)
 
 void riscv32_execute(struct riscv32_Cpu* cpu, const size_t instructions_len,
-		const uint32_t* instructions);
+		const uint8_t* instructions);
 void riscv32_dumpcpu(const struct riscv32_Cpu* cpu);
 
 #endif // RISCV32_H

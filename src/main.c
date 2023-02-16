@@ -51,14 +51,13 @@ main(int argc, char** argv)
 		panic("error opening %s: %s", argv[1], strerror(errno));
 	}
 
-	size_t    executable_len = 0;
-	uint32_t* executable     = (uint32_t*)readfull(f, &executable_len);
+	size_t   executable_len = 0;
+	uint8_t* executable     = readfull(f, &executable_len);
 	fclose(f);
 
 	if (executable_len % 4 != 0) {
 		panic("bruh moment");
 	}
-	executable_len /= 4;
 
 	struct riscv32_Cpu cpu = {0};
 	riscv32_execute(&cpu, executable_len, executable);
