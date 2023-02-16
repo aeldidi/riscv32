@@ -25,7 +25,7 @@ enum riscv32_instructions {
 };
 
 enum riscv32_instructions
-decode(const uint32_t instruction)
+opcode(const uint32_t instruction)
 {
 	if ((instruction & 0b00000000000000000000000001111111) == 0x37) {
 		return LUI;
@@ -62,8 +62,8 @@ riscv32_execute(struct riscv32_Cpu* cpu, const size_t instructions_len,
 			panic("out of bounds pc: %zu", cpu->pc);
 		}
 		uint32_t instruction = instructions[cpu->pc];
-		uint32_t opcode      = decode(instruction);
-		switch (opcode) {
+		uint32_t oc          = opcode(instruction);
+		switch (oc) {
 		case ECALL:
 			// FIXME: The ecall instruction is used to exit,
 			//        regardless of what's in a7.
